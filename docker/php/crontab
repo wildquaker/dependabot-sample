@@ -1,0 +1,1 @@
+0 */8 * * * /usr/local/bin/php /var/www/site/bin/console app:leasing-units-sync >> /var/log/cron.log 2>&1

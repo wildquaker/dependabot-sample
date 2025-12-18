@@ -1,0 +1,85 @@
+version: "3.8"
+services:
+
+  app:
+    build: docker/php
+    container_name: app
+    working_dir: /var/www/site
+    volumes:
+      - ./site:/var/www/site
+      - ./docker/php/conf.d/custom.ini:/usr/local/etc/php/conf.d/custom.ini
+      - ./docker/php/php-fpm/zz-symfony-overrides.conf:/usr/local/etc/php-fpm.d/zz-symfony-overrides.conf:ro
+      - vendor-data:/var/www/site/vendor
+      - var-data:/var/www/site/var
+    networks:
+      - app-network
+    depends_on:
+      - app-redis
+    links:
+      - app-redis
+
+  app-nginx:
+    image: nginx:1.15.12-alpine
+    container_name: app-nginx
+    working_dir: /var/www/site
+    ports:
+      - "8084:80"
+    volumes:
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./site:/var/www/site:ro
+      - app-vendor-data:/var/www/site/vendor:ro
+      - app-var-data:/var/www/site/var:ro
+    networks:
+      - app-network
+
+  app-redis:
+    image: redis:6.2-alpine
+    container_name: app-redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - app-redis-data:/data
+    networks:
+      - app-network
+
+  app-phpmyadmin:
+    ports:
+      - "8085:80"
+    container_name: app-phpmyadmin
+    depends_on:
+      - app-mysql
+    image: phpmyadmin
+    environment:
+      PMA_HOST: app-mysql:3306
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      UPLOAD_LIMIT: 30000000000
+      MEMORY_LIMIT: 30000000000
+    networks:
+      - app-network
+
+  app-mysql:
+    image: mysql:latest
+    container_name: app-mysql
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-db}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root}
+      - MYSQL_USER=${MYSQL_USER:-user}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-pass}
+    volumes:
+      - app-db-data:/var/lib/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+    ports:
+      - "3308:3306"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  app-vendor-data:
+  app-var-data:
+  app-redis-data:
+  app-db-data:
