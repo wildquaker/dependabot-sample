@@ -1,0 +1,21 @@
+version: 2
+updates:
+  # 1. Monitor Docker dependencies
+  - package-ecosystem: "docker"
+    directory: "/docker"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "docker"
+      - "dependencies"
+
+  # 2. Monitor Symfony (PHP/Composer) dependencies
+  - package-ecosystem: "composer"
+    directory: "/site"
+    schedule:
+      interval: "weekly"
+    # Optional: Increase the limit of open PRs to avoid noise
+    open-pull-requests-limit: 10
+    labels:
+      - "backend"
+      - "php"
