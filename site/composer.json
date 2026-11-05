@@ -56,7 +56,7 @@
         "symfony/ux-autocomplete": "^2.31",
         "symfony/ux-dropzone": "^2.31",
         "symfony/ux-icons": "^2.31",
-        "symfony/ux-live-component": "^2.31",
+        "symfony/ux-live-component": "^3.6",
         "symfony/ux-turbo": "^2.31",
         "symfony/ux-twig-component": "^2.31",
         "symfony/validator": "7.4.*",
